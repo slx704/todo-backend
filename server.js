@@ -4,14 +4,16 @@ const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
 
 const app = express()
-const port = 3000
+
+// 端口：Railway 会用 process.env.PORT，本地默认 3000
+const PORT = process.env.PORT || 3000
 
 // 中间件
 app.use(cors())
 app.use(express.json())
 
 // 密钥（生产环境请使用环境变量）
-const JWT_SECRET = 'your-secret-key-change-this'
+const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-this'
 
 // ---------- 内存存储（重启会丢失，后续可换数据库）----------
 let users = []        // { id, username, password }
@@ -19,6 +21,11 @@ let nextUserId = 1
 
 let tasks = []        // { id, text, done, userId }
 let nextTaskId = 1
+
+// ---------- 健康检查（用于 Railway 确认服务运行）----------
+app.get('/', (req, res) => {
+    res.json({ message: 'Todo API is running', status: 'ok' })
+})
 
 // ---------- 认证中间件 ----------
 const authenticate = (req, res, next) => {
@@ -118,6 +125,6 @@ app.delete('/tasks', authenticate, (req, res) => {
 })
 
 // 启动服务器
-app.listen(port, () => {
-    console.log(`Server running at http://localhost:3000`)
+app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`)
 })
